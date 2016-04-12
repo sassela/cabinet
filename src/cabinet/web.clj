@@ -3,8 +3,7 @@
   (:use ring.middleware.json-params)
   (:require [clj-json.core :as json])
   (:require [cabinet.elem :as elem])
-  (:import org.codehaus.jackson.JsonParseException)
-  (:import clojure.contrib.condition.Condition))
+  (:import org.codehaus.jackson.JsonParseException))
 
 (defn json-response [data & [status]]
   {:status (or status 200)
@@ -22,11 +21,14 @@
           (json-response {"error" "resource not found"} 404))
       (catch JsonParseException e
         (json-response {"error" "malformed json"} 400))
-      (catch Condition e
+      (catch Exception e
         (let [{:keys [type message]} (meta e)]
           (json-response {"error" message} (error-codes type)))))))
 
 (defroutes handler
+  (GET "/" []
+   (json-response {"hello" "world"}))
+
   (GET "/elems" []
     (json-response (elem/list)))
 
